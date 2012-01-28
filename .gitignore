@@ -1,0 +1,5 @@
+# Ignore all entity folders (only have numbers)
+[0-9]*/
+*~
+*.swp
+*.pyc
