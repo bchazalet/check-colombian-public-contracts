@@ -6,10 +6,10 @@ import os.path
 import os
 
 # TODO
-# Generate a unique file with only new processes
 # Handle if there is more than 50 results and they are not all on the page
 # DictDiffer should return the list of actual objets, no only the keys --> Wrapper
 # Handle HTTP Error 500: internal server error
+# Handle unique file name and many running the same day. How do we name the files?
 
 MAIN_FILE_NAME = "new-processes.csv"
 FILE_NAME = "processes.txt"
@@ -44,7 +44,9 @@ def do_one(entity):
 	print "***** %d process(es) found" % len(parser.all_processes)
 	#for process in parser.all_processes.itervalues():
 	#	print process
-
+	if len(parser.all_processes) == 50:
+		print "WARNING: this entity could have more than 50 results. You SHOULD check manually."
+	
 	# Retrieve saved processes from hard drive
 	saved_processes = read_processes(entity) #gen_test_processes()
 	# Compare fetched process with saved ones
