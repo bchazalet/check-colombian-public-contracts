@@ -6,28 +6,34 @@ import os.path
 import os
 
 # TODO
-# Input all entities (700+) and their name
 # Generate a unique file with only new processes
-# Parsing still leaves weird stuffs like td>
 # Handle if there is more than 50 results and they are not all on the page
 # DictDiffer should return the list of actual objets, no only the keys --> Wrapper
+# Handle HTTP Error 500: internal server error
+
+MAIN_FILE_NAME = "new-processes.csv"
 FILE_NAME = "processes.txt"
 ENTITY_INPUT = "entities-to-check.csv"
 
 def main():
 	#POST: urllib.urlencode({"entidad" : "20589302", "tipoProceso" : "1", "estado" : "1"})
 	entities = import_entities()
+	# entities = {"285000001": "Gobernacion"}
 	if len(entities) == 0:
 		print "No entities found. Are you sure the file is there?"
 	elif len(entities) < 10:
 		print "Will run against those entities %s" % entities
 	else:
 		print "Will run against %d entities" % len(entities)
+
 	for entity_id, entity_name in entities.iteritems():
 		print "\n***** Entity %s (%s) *****" % (entity_name, entity_id)
-		do_one(entity_id)
+		new_processes = do_one(entity_id)
+		if len(new_processes) > 0:
+			append_to_file(entity_id, entity_name, new_processes)
 
 def do_one(entity):
+	"""Process one entity and return the list of new processes"""
 	url = "http://www.contratos.gov.co/consultas/resultadosConsulta.do?entidad=%s&desdeFomulario=true&estado=1&tipoProceso=1&objeto=72000000" % entity # objecto is the Producto o Servicio field
 	f = urllib2.urlopen(url)
 	# Now we look for the <table> tag and retrieve all processes
@@ -43,9 +49,9 @@ def do_one(entity):
 	saved_processes = read_processes(entity) #gen_test_processes()
 	# Compare fetched process with saved ones
 	dictDiffer = dictdiffer.DictDiffer(parser.all_processes, saved_processes)
-	result = list(dictDiffer.added())
+	new_processes_key = list(dictDiffer.added())
 	print "***** Processes added since last time "
-	for p in result:
+	for p in new_processes_key:
 		print p
 
 	result = list(dictDiffer.removed())
@@ -53,9 +59,24 @@ def do_one(entity):
 	for p in result:
 		print p
 
-	# Write all processes fetched today to file
+	# Write all processes fetched today to entity file
 	write_processes(entity, parser.all_processes)
 
+	new_processes = { k: parser.all_processes[k] for k in new_processes_key}
+
+	return new_processes
+
+def append_to_file(entity_id, entity_name, dict_of_processes):
+	"""Append processes to a centralized file listing all new processes"""
+	if len(dict_of_processes) > 0:
+		file_path = os.path.join(os.curdir, MAIN_FILE_NAME)
+		file_input = open(file_path,'a') # will append at this end of the file and will create the file if does not exist
+		file_input.write(entity_id + " - " + entity_name + "\n")
+		for p in dict_of_processes.itervalues():
+			file_input.write(p.stringify(';'))
+			file_input.write('\n')
+		file_input.write('\n')
+		file_input.close()
 
 def write_processes(entity, dict_of_processes):
 	"""Write the processes on the hard drive"""
