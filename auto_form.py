@@ -6,6 +6,8 @@ import os.path
 import os
 
 # TODO
+# Input all entities (700+) and their name
+# Generate a unique file with only new processes
 # Parsing still leaves weird stuffs like td>
 # Handle if there is more than 50 results and they are not all on the page
 # DictDiffer should return the list of actual objets, no only the keys --> Wrapper
@@ -14,22 +16,22 @@ FILE_NAME = "processes.txt"
 def main():
 	#data = urllib.urlencode({"entidad" : "20589302", "tipoProceso" : "1", "estado" : "1"})
 	#url = "https://www.contratos.gov.co/consultas/resultadoListadoProcesos.jsp"
-	entities = ["01002034"] #entity = "01002034"
+	# Entidades: 20589302, 123069000, 01002034
+	entities = ["01002034", "20589302", "12306900"] #entity = "01002034"
 	print "Will run against those entities %s" % entities
 	for entity in entities:
-		print "Entity %s"
+		print "\n***** Entity %s *****" % entity
 		do_one(entity)
 
 def do_one(entity):
-	# Entidades: 20589302, 123069000, 01002034
-	url = "http://www.contratos.gov.co/consultas/resultadosConsulta.do?entidad=%s&desdeFomulario=true&estado=1&tipoProceso=1" % entity
+	url = "http://www.contratos.gov.co/consultas/resultadosConsulta.do?entidad=%s&desdeFomulario=true&estado=1&tipoProceso=1&objeto=72000000" % entity # objecto is the Producto o Servicio field
 	f = urllib2.urlopen(url)
 	# Now we look for the <table> tag and retrieve all processes
 	parser = processparser.HtmlProcessParser()
 	parser.feed(f.read())
 	f.close()
 	# Print all parsed processes --commented out
-	#print "***** %d process(es) found *****" % len(parser.all_processes)
+	print "***** %d process(es) found" % len(parser.all_processes)
 	#for process in parser.all_processes.itervalues():
 	#	print process
 
@@ -38,12 +40,12 @@ def do_one(entity):
 	# Compare fetched process with saved ones
 	dictDiffer = dictdiffer.DictDiffer(parser.all_processes, saved_processes)
 	result = list(dictDiffer.added())
-	print "***** Processes added since last time *****"
+	print "***** Processes added since last time "
 	for p in result:
 		print p
 
 	result = list(dictDiffer.removed())
-	print "***** Processes removed since last time *****"
+	print "***** Processes removed since last time"
 	for p in result:
 		print p
 
@@ -56,7 +58,7 @@ def write_processes(entity, dict_of_processes):
 	# Check the entity folder exists
 	if not os.path.isdir(entity):
 		# If not, create it
-		print "Directory for %s does not exist, creating it." % entity
+		print "***** Directory for %s does not exist, creating it." % entity
 		os.mkdir(entity)
 	# Check that the processes file exists
 	file_path = os.path.join(os.curdir, entity, FILE_NAME)
@@ -71,7 +73,7 @@ def read_processes(entity):
 	dict_of_processes = {}
 	file_path = os.path.join(os.curdir, entity, FILE_NAME)
 	if not os.path.isfile(file_path):
-		print "There is no file for entity %s" % entity
+		print "***** There is no file for entity %s" % entity
 	else:
 		file_input = open(file_path, 'r')
 		# First thing on the line is the id (before the first semicolumn)
