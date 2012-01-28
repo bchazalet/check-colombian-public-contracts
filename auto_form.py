@@ -12,14 +12,17 @@ import os
 # Handle if there is more than 50 results and they are not all on the page
 # DictDiffer should return the list of actual objets, no only the keys --> Wrapper
 FILE_NAME = "processes.txt"
+ENTITY_INPUT = "entities-to-check.csv"
 
 def main():
 	#POST: urllib.urlencode({"entidad" : "20589302", "tipoProceso" : "1", "estado" : "1"})
-	entities = {
-	     "01002034" : "Entity 1",
-	     "20589302" : "Entity 2",
-	     "12306900" : "Entity 3" }
-	print "Will run against those entities %s" % entities
+	entities = import_entities()
+	if len(entities) == 0:
+		print "No entities found. Are you sure the file is there?"
+	elif len(entities) < 10:
+		print "Will run against those entities %s" % entities
+	else:
+		print "Will run against %d entities" % len(entities)
 	for entity_id, entity_name in entities.iteritems():
 		print "\n***** Entity %s (%s) *****" % (entity_name, entity_id)
 		do_one(entity_id)
@@ -86,6 +89,24 @@ def read_processes(entity):
 		file_input.close()
 	# In any case return the dict
 	return dict_of_processes
+
+def import_entities():
+	"""Read entities from file on hard drive """
+	dict_of_entities = {}
+	file_path = os.path.join(os.curdir, ENTITY_INPUT)
+	if not os.path.isfile(file_path):
+		print "***** Entity file is missing"
+	else:
+		file_input = open(file_path, 'r')
+		# First thing on the line is the id (before the first semicolumn)
+		for line in file_input:
+			semi_col_idx = line.find(';')
+			if semi_col_idx != -1:
+				entity_id = line[0:semi_col_idx]
+				dict_of_entities[entity_id] = line[semi_col_idx+1:-1] #-1 is to remove the \n at the end of the line
+		file_input.close()
+	# In any case return the dict
+	return dict_of_entities
 
 def gen_test_processes():
 	"""Generate fake processses to test some functions"""
