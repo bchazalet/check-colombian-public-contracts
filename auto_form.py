@@ -14,14 +14,15 @@ import os
 FILE_NAME = "processes.txt"
 
 def main():
-	#data = urllib.urlencode({"entidad" : "20589302", "tipoProceso" : "1", "estado" : "1"})
-	#url = "https://www.contratos.gov.co/consultas/resultadoListadoProcesos.jsp"
-	# Entidades: 20589302, 123069000, 01002034
-	entities = ["01002034", "20589302", "12306900"] #entity = "01002034"
+	#POST: urllib.urlencode({"entidad" : "20589302", "tipoProceso" : "1", "estado" : "1"})
+	entities = {
+	     "01002034" : "Entity 1",
+	     "20589302" : "Entity 2",
+	     "12306900" : "Entity 3" }
 	print "Will run against those entities %s" % entities
-	for entity in entities:
-		print "\n***** Entity %s *****" % entity
-		do_one(entity)
+	for entity_id, entity_name in entities.iteritems():
+		print "\n***** Entity %s (%s) *****" % (entity_name, entity_id)
+		do_one(entity_id)
 
 def do_one(entity):
 	url = "http://www.contratos.gov.co/consultas/resultadosConsulta.do?entidad=%s&desdeFomulario=true&estado=1&tipoProceso=1&objeto=72000000" % entity # objecto is the Producto o Servicio field
