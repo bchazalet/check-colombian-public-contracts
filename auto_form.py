@@ -7,21 +7,26 @@ import sys
 # My own modules
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), 'pym'))
 import processparser
-import notification
+from notification import Notification
 import dictdiffer
 
 # TODO
-# Package the app into a hierarchy of folder that can be tar or zip
-# Improve email notification with MIME format
 # Handle if there is more than 50 results and they are not all on the page
-# DictDiffer should return the list of actual objets, no only the keys --> Wrapper
 # Handle HTTP Error 500: internal server error
 # Handle unique file name and many running the same day. How do we name the files?
+# Create a script that would setup cron to run the program every day at 5am
+
+# LOW PRIORITY
+# DictDiffer should return the list of actual objets, no only the keys --> Wrapper
+# Create a script that can tar and zip the folder for distribution
+# Improve email notification with MIME format
+# A clear entities function that clears all entities folder (with a WARNING)
 
 MAIN_FILE_NAME = "new-processes.csv"
 FILE_NAME = "processes.txt"
 ENTITY_INPUT = "entities-to-check.csv"
 ENTITIES_FOLDER = "entities"
+REPORTS_FOLDER = "reports"
 
 def main():
 	#POST: urllib.urlencode({"entidad" : "20589302", "tipoProceso" : "1", "estado" : "1"})
@@ -38,8 +43,10 @@ def main():
 		print "\n***** Entity %s (%s) *****" % (entity_name, entity_id)
 		new_processes = do_one(entity_id)
 		if len(new_processes) > 0:
-			append_to_file(entity_id, entity_name, new_processes)
-	notif =  notification.Notification("Nuevos contratos disponibles", "There are new processes");
+			append_to_report(entity_id, entity_name, new_processes)
+
+	# Notify the result
+	notif = Notification("Nuevos contratos disponibles", "There are new processes");
 	notif.send()
 
 def do_one(entity):
@@ -78,10 +85,10 @@ def do_one(entity):
 
 	return new_processes
 
-def append_to_file(entity_id, entity_name, dict_of_processes):
+def append_to_report(entity_id, entity_name, dict_of_processes):
 	"""Append processes to a centralized file listing all new processes"""
 	if len(dict_of_processes) > 0:
-		file_path = os.path.join(os.curdir, MAIN_FILE_NAME)
+		file_path = os.path.join(os.curdir, REPORTS_FOLDER, MAIN_FILE_NAME)
 		file_input = open(file_path,'a') # will append at this end of the file and will create the file if does not exist
 		file_input.write(entity_id + " - " + entity_name + "\n")
 		for p in dict_of_processes.itervalues():
