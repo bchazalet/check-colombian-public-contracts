@@ -1,13 +1,14 @@
 #!/usr/bin/python -tt
 import urllib2
 import processparser
+import notification
 import dictdiffer
 import os.path
 import os
 
 # TODO
 # Package the app into a hierarchy of folder that can be tar or zip
-# Implement email notification
+# Improve email notification with MIME format
 # Handle if there is more than 50 results and they are not all on the page
 # DictDiffer should return the list of actual objets, no only the keys --> Wrapper
 # Handle HTTP Error 500: internal server error
@@ -20,8 +21,8 @@ ENTITIES_FOLDER = "entities"
 
 def main():
 	#POST: urllib.urlencode({"entidad" : "20589302", "tipoProceso" : "1", "estado" : "1"})
-	entities = import_entities()
-	# entities = {"285000001": "Gobernacion"}
+	#entities = import_entities()
+	entities = {"285000001": "Gobernacion"}
 	if len(entities) == 0:
 		print "No entities found. Are you sure the file is there?"
 	elif len(entities) < 10:
@@ -34,6 +35,8 @@ def main():
 		new_processes = do_one(entity_id)
 		if len(new_processes) > 0:
 			append_to_file(entity_id, entity_name, new_processes)
+	notif =  notification.Notification("Nuevos contratos disponibles", "There are new processes");
+	notif.send()
 
 def do_one(entity):
 	"""Process one entity and return the list of new processes"""
