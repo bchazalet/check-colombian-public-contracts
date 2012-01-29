@@ -1,0 +1,5 @@
+#!/bin/bash
+PYTHON_MODULES=pym/*py
+ARCHIVE_NAME=test.zip
+
+zip $ARCHIVE_NAME $PYTHON_MODULES reports entities-to-check.csv auto_form.py
