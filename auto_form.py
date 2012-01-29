@@ -6,6 +6,8 @@ import os.path
 import os
 
 # TODO
+# Package the app into a hierarchy of folder that can be tar or zip
+# Implement email notification
 # Handle if there is more than 50 results and they are not all on the page
 # DictDiffer should return the list of actual objets, no only the keys --> Wrapper
 # Handle HTTP Error 500: internal server error
@@ -14,6 +16,7 @@ import os
 MAIN_FILE_NAME = "new-processes.csv"
 FILE_NAME = "processes.txt"
 ENTITY_INPUT = "entities-to-check.csv"
+ENTITIES_FOLDER = "entities"
 
 def main():
 	#POST: urllib.urlencode({"entidad" : "20589302", "tipoProceso" : "1", "estado" : "1"})
@@ -83,12 +86,13 @@ def append_to_file(entity_id, entity_name, dict_of_processes):
 def write_processes(entity, dict_of_processes):
 	"""Write the processes on the hard drive"""
 	# Check the entity folder exists
-	if not os.path.isdir(entity):
+	entity_path = os.path.join(os.curdir, ENTITIES_FOLDER, entity)
+	if not os.path.isdir(entity_path):
 		# If not, create it
 		print "***** Directory for %s does not exist, creating it." % entity
-		os.mkdir(entity)
+		os.makedirs(entity_path)
 	# Check that the processes file exists
-	file_path = os.path.join(os.curdir, entity, FILE_NAME)
+	file_path = os.path.join(os.curdir, entity_path, FILE_NAME)
 	file_input = open(file_path,'w') # will create the file if does not exist
 	for p in dict_of_processes.itervalues():
 		file_input.write(p.stringify(';'))
@@ -98,7 +102,7 @@ def write_processes(entity, dict_of_processes):
 def read_processes(entity):
 	"""Read processes from file on hard drive """
 	dict_of_processes = {}
-	file_path = os.path.join(os.curdir, entity, FILE_NAME)
+	file_path = os.path.join(os.curdir, ENTITIES_FOLDER, entity, FILE_NAME)
 	if not os.path.isfile(file_path):
 		print "***** There is no file for entity %s" % entity
 	else:
