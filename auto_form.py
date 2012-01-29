@@ -18,7 +18,6 @@ from report import Report
 
 # LOW PRIORITY
 # DictDiffer should return the list of actual objets, no only the keys --> Wrapper
-# Create a script that can tar and zip the folder for distribution
 # Improve email notification with MIME format
 # A clear entities function that clears all entities folder (with a WARNING)
 # The way we build the new processes filename is not bullet proof (should get the latest filename)

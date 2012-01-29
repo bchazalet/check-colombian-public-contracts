@@ -1,5 +1,6 @@
 #!/bin/bash
+VERSION=1.0
 PYTHON_MODULES=pym/*py
-ARCHIVE_NAME=test.zip
+ARCHIVE_NAME=AutoForm-release_$VERSION.zip
 
 zip $ARCHIVE_NAME $PYTHON_MODULES reports entities-to-check.csv auto_form.py
