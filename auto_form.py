@@ -29,7 +29,6 @@ ENTITIES_FOLDER = "entities"
 REPORTS_FOLDER = "reports"
 
 def main():
-	#POST: urllib.urlencode({"entidad" : "20589302", "tipoProceso" : "1", "estado" : "1"})
 	entities = import_entities()
 	#entities = {"285000001": "Gobernacion"}
 	if len(entities) == 0:
@@ -39,21 +38,34 @@ def main():
 	else:
 		print "Will run against %d entities" % len(entities)
 
+	total = 0;
 	report = Report(os.path.join(os.curdir,REPORTS_FOLDER))
 	for entity_id, entity_name in entities.iteritems():
 		print "\n***** Entity %s (%s) *****" % (entity_name, entity_id)
 		new_processes = do_one(entity_id)
 		if len(new_processes) > 0:
 			report.append(entity_id, entity_name, new_processes)
+			total += len(new_processes)
 
 	# Notify the result
 	notif = Notification("Nuevos contratos disponibles", "There are new processes");
 	notif.send()
+	# Display summary
+	print "\n"
+	print "#############################################################"
+	print "# Summary"
+	print "# We found %d new processes" % total
+	print "# Report avail. at %s" % report.file_path
+	print "#############################################################"
 
 def do_one(entity):
 	"""Process one entity and return the list of new processes"""
 	url = "http://www.contratos.gov.co/consultas/resultadosConsulta.do?entidad=%s&desdeFomulario=true&estado=1&tipoProceso=1&objeto=72000000" % entity # objecto is the Producto o Servicio field
-	f = urllib2.urlopen(url)
+	try:
+		f = urllib2.urlopen(url)
+	except IOError:
+		print "Could not fetch the url. Skipping."
+		return {}
 	# Now we look for the <table> tag and retrieve all processes
 	parser = processparser.HtmlProcessParser()
 	parser.feed(f.read())

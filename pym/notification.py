@@ -29,7 +29,7 @@ class Notification(object):
 			server.sendmail(from_addr, to_addrs, self.message)  
 			server.quit()
 
-		print "Notification sent"
+		#print "Notification sent"
 
   
 
