@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), 'py
 import processparser
 from notification import Notification
 import dictdiffer
+from report import Report
 
 # TODO
 # Handle if there is more than 50 results and they are not all on the page
@@ -22,7 +23,6 @@ import dictdiffer
 # Improve email notification with MIME format
 # A clear entities function that clears all entities folder (with a WARNING)
 
-MAIN_FILE_NAME = "new-processes.csv"
 FILE_NAME = "processes.txt"
 ENTITY_INPUT = "entities-to-check.csv"
 ENTITIES_FOLDER = "entities"
@@ -39,11 +39,12 @@ def main():
 	else:
 		print "Will run against %d entities" % len(entities)
 
+	report = Report(os.path.join(os.curdir,REPORTS_FOLDER))
 	for entity_id, entity_name in entities.iteritems():
 		print "\n***** Entity %s (%s) *****" % (entity_name, entity_id)
 		new_processes = do_one(entity_id)
 		if len(new_processes) > 0:
-			append_to_report(entity_id, entity_name, new_processes)
+			report.append(entity_id, entity_name, new_processes)
 
 	# Notify the result
 	notif = Notification("Nuevos contratos disponibles", "There are new processes");
@@ -84,18 +85,6 @@ def do_one(entity):
 	new_processes = { k: parser.all_processes[k] for k in new_processes_key}
 
 	return new_processes
-
-def append_to_report(entity_id, entity_name, dict_of_processes):
-	"""Append processes to a centralized file listing all new processes"""
-	if len(dict_of_processes) > 0:
-		file_path = os.path.join(os.curdir, REPORTS_FOLDER, MAIN_FILE_NAME)
-		file_input = open(file_path,'a') # will append at this end of the file and will create the file if does not exist
-		file_input.write(entity_id + " - " + entity_name + "\n")
-		for p in dict_of_processes.itervalues():
-			file_input.write(p.stringify(';'))
-			file_input.write('\n')
-		file_input.write('\n')
-		file_input.close()
 
 def write_processes(entity, dict_of_processes):
 	"""Write the processes on the hard drive"""
