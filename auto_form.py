@@ -1,10 +1,14 @@
 #!/usr/bin/python -tt
 import urllib2
+import os.path
+import os
+import sys
+
+# My own modules
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), 'pym'))
 import processparser
 import notification
 import dictdiffer
-import os.path
-import os
 
 # TODO
 # Package the app into a hierarchy of folder that can be tar or zip
