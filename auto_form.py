@@ -14,7 +14,6 @@ from report import Report
 # TODO
 # Handle if there is more than 50 results and they are not all on the page
 # Handle HTTP Error 500: internal server error
-# Handle unique file name and many running the same day. How do we name the files?
 # Create a script that would setup cron to run the program every day at 5am
 
 # LOW PRIORITY
@@ -22,6 +21,7 @@ from report import Report
 # Create a script that can tar and zip the folder for distribution
 # Improve email notification with MIME format
 # A clear entities function that clears all entities folder (with a WARNING)
+# The way we build the new processes filename is not bullet proof (should get the latest filename)
 
 FILE_NAME = "processes.txt"
 ENTITY_INPUT = "entities-to-check.csv"

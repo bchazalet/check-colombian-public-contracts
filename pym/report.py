@@ -1,14 +1,16 @@
 import datetime
 import os
 
-MAIN_FILE_NAME = "new-processes.csv"
+MAIN_FILE_NAME = "new_processes"
 
 class Report(object):
 	def __init__(self, folder_path):
-		today = datetime.date.today()
-		filename = today.strftime("%Y%m%d") + "-" + MAIN_FILE_NAME
-		self.file_path = os.path.join(folder_path, filename)
+		self.today = datetime.date.today().strftime("%Y%m%d")
+		filename = self.today + "_" + MAIN_FILE_NAME
+		existing_files = filter(isFileFromToday, os.listdir(folder_path))
+		self.file_path = os.path.join(folder_path, (filename + "-" + str(len(existing_files)+1) + ".csv"))
 		#self.folder_path = folder_path
+
 	def append(self,entity_id, entity_name, dict_of_processes):
 		"""Append processes to a centralized file listing all new processes"""
 		if len(dict_of_processes) > 0:
@@ -20,5 +22,10 @@ class Report(object):
 			    file_input.write('\n')
 			file_input.write('\n')
 			file_input.close()
+
+
+def isFileFromToday(file):
+	today = datetime.date.today().strftime("%Y%m%d")
+	return file.startswith(today)
 
 
