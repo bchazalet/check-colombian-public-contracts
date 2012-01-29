@@ -30,8 +30,8 @@ REPORTS_FOLDER = "reports"
 
 def main():
 	#POST: urllib.urlencode({"entidad" : "20589302", "tipoProceso" : "1", "estado" : "1"})
-	#entities = import_entities()
-	entities = {"285000001": "Gobernacion"}
+	entities = import_entities()
+	#entities = {"285000001": "Gobernacion"}
 	if len(entities) == 0:
 		print "No entities found. Are you sure the file is there?"
 	elif len(entities) < 10:
