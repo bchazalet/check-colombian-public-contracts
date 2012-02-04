@@ -3,4 +3,4 @@ VERSION=1.1
 PYTHON_MODULES=pym/*py
 ARCHIVE_NAME=AutoForm-release_$VERSION.zip
 
-zip $ARCHIVE_NAME $PYTHON_MODULES reports entities-to-check.csv auto_form.py
+zip $ARCHIVE_NAME $PYTHON_MODULES reports log entities-to-check.csv auto_form.py
