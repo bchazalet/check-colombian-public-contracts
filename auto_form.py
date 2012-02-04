@@ -3,6 +3,7 @@ import urllib2
 import os.path
 import os
 import sys
+import datetime
 
 # My own modules
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), 'pym'))
@@ -29,22 +30,30 @@ REPORTS_FOLDER = "reports"
 base_dir = None
 
 def main():
-	print "Args: "
-	for p in sys.argv:
-		print p
-	# Where is our base folder (the one containing the auto_form.py file)
+	# Where is our base folder (the one containing the auto_form.py file)?
 	global base_dir 
 	base_dir = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
-	print base_dir
+	# Parsing arguments
+	if len(sys.argv) > 2:
+		print "Too many arguments"
+		return
+	elif len(sys.argv) == 2:
+		if sys.argv[1] == "--setup-cron":
+			setup_cron()
+			return
+		elif sys.arg[1] != "--run":
+			print "invalid option: %s" % sys.argv[0]
+			return
+	# We are good to go!
 	entities = import_entities()
 	#entities = {"285000001": "Gobernacion"}
+	current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 	if len(entities) == 0:
-		print "No entities found. Are you sure the file is there?"
+		print "%s:: No entities found. Are you sure the file is there?" % current_time
 	elif len(entities) < 10:
-		print "Will run against those entities %s" % entities
+		print "%s:: Will run against those entities %s" % (curent_time,entities)
 	else:
-		print "Will run against %d entities" % len(entities)
-
+		print "%s:: Will run against %d entities" % (current_time,len(entities))
 	total = 0;
 	report = Report(os.path.join(base_dir,REPORTS_FOLDER))
 	for entity_id, entity_name in entities.iteritems():
@@ -157,6 +166,14 @@ def import_entities():
 		file_input.close()
 	# In any case return the dict
 	return dict_of_entities
+
+def setup_cron():
+	print "Not implemented yet"
+	print "Meanwhile you can set it up editing your cron file manually."
+	print "crontab -e"
+	print "and add those lines (will run every day at 7am)"
+	print 'MAILTO=""'
+	print "00 06 * * * %s/auto_form.py >> %s/log/out" % (base_dir,base_dir)
 
 def gen_test_processes():
 	"""Generate fake processses to test some functions"""
