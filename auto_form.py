@@ -26,8 +26,16 @@ FILE_NAME = "processes.txt"
 ENTITY_INPUT = "entities-to-check.csv"
 ENTITIES_FOLDER = "entities"
 REPORTS_FOLDER = "reports"
+base_dir = None
 
 def main():
+	print "Args: "
+	for p in sys.argv:
+		print p
+	# Where is our base folder (the one containing the auto_form.py file)
+	global base_dir 
+	base_dir = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
+	print base_dir
 	entities = import_entities()
 	#entities = {"285000001": "Gobernacion"}
 	if len(entities) == 0:
@@ -38,7 +46,7 @@ def main():
 		print "Will run against %d entities" % len(entities)
 
 	total = 0;
-	report = Report(os.path.join(os.curdir,REPORTS_FOLDER))
+	report = Report(os.path.join(base_dir,REPORTS_FOLDER))
 	for entity_id, entity_name in entities.iteritems():
 		print "\n***** Entity %s (%s) *****" % (entity_name, entity_id)
 		new_processes = do_one(entity_id)
@@ -100,13 +108,13 @@ def do_one(entity):
 def write_processes(entity, dict_of_processes):
 	"""Write the processes on the hard drive"""
 	# Check the entity folder exists
-	entity_path = os.path.join(os.curdir, ENTITIES_FOLDER, entity)
+	entity_path = os.path.join(base_dir, ENTITIES_FOLDER, entity)
 	if not os.path.isdir(entity_path):
 		# If not, create it
 		print "***** Directory for %s does not exist, creating it." % entity
 		os.makedirs(entity_path)
 	# Check that the processes file exists
-	file_path = os.path.join(os.curdir, entity_path, FILE_NAME)
+	file_path = os.path.join(base_dir, entity_path, FILE_NAME)
 	file_input = open(file_path,'w') # will create the file if does not exist
 	for p in dict_of_processes.itervalues():
 		file_input.write(p.stringify(';'))
@@ -116,7 +124,7 @@ def write_processes(entity, dict_of_processes):
 def read_processes(entity):
 	"""Read processes from file on hard drive """
 	dict_of_processes = {}
-	file_path = os.path.join(os.curdir, ENTITIES_FOLDER, entity, FILE_NAME)
+	file_path = os.path.join(base_dir, ENTITIES_FOLDER, entity, FILE_NAME)
 	if not os.path.isfile(file_path):
 		print "***** There is no file for entity %s" % entity
 	else:
@@ -134,9 +142,10 @@ def read_processes(entity):
 def import_entities():
 	"""Read entities from file on hard drive """
 	dict_of_entities = {}
-	file_path = os.path.join(os.curdir, ENTITY_INPUT)
+	file_path = os.path.join(base_dir, ENTITY_INPUT)
 	if not os.path.isfile(file_path):
 		print "***** Entity file is missing"
+		print "entity file path = %s" % file_path
 	else:
 		file_input = open(file_path, 'r')
 		# First thing on the line is the id (before the first semicolumn)
