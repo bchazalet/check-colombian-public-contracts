@@ -2,6 +2,7 @@
 import urllib2
 import os.path
 import os
+import pwd
 import sys
 import datetime
 
@@ -15,7 +16,7 @@ from report import Report
 # TODO
 # Handle if there is more than 50 results and they are not all on the page
 # Handle HTTP Error 500: internal server error
-# Create a script that would setup cron to run the program every day at 5am
+# Handle if you are running on Windows
 
 # LOW PRIORITY
 # DictDiffer should return the list of actual objets, no only the keys --> Wrapper
@@ -168,12 +169,38 @@ def import_entities():
 	return dict_of_entities
 
 def setup_cron():
-	print "Not implemented yet"
-	print "Meanwhile you can set it up editing your cron file manually."
-	print "crontab -e"
-	print "and add those lines (will run every day at 7am)"
-	print 'MAILTO=""'
-	print "00 06 * * * %s/auto_form.py >> %s/log/out" % (base_dir,base_dir)
+	owner_name = retrieve_file_owner();
+	if owner_name != None:
+		try:
+			cron_file = open("/etc/cron.d/auto_form","w")
+			cron_file.write('MAILTO=""\n')
+			cron_file.write("00 05 * * * %s %s/auto_form.py >> %s/log/out\n" % (owner_name, base_dir, base_dir))
+			cron_file.close()
+			print "Wrote in /etc/cron.d/auto_form"
+			print "Cron setup to run every day at 5am."
+		except IOError:
+			print "Could not write in /etc/cron.d/auto_form. Try to execute using sudo."
+	else:
+		print "Could not get your username. Failing."
+
+#	print "Not implemented yet"
+#	print "Meanwhile you can set it up editing your cron file manually."
+#	print "crontab -e"
+#	print "and add those lines (will run every day at 7am)"
+#	print 'MAILTO=""'
+#	print "00 06 * * * %s/auto_form.py >> %s/log/out" % (base_dir,base_dir)
+
+def retrieve_file_owner():
+	try:
+		main_file = os.path.join(base_dir, "auto_form.py")
+		st = os.stat(main_file)
+	except IOError:
+		print "Could not retrieve file's owner name on %s" % main_file
+	else:
+		user_info = pwd.getpwuid(st.st_uid)
+		return user_info[0]
+
+	return None
 
 def gen_test_processes():
 	"""Generate fake processses to test some functions"""
