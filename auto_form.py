@@ -90,6 +90,11 @@ def do_one(entity):
 	except IOError:
 		print "Could not fetch the url. Skipping."
 		return {}
+	except urllib2.HTTPError, error:
+		print "A HTTP error occured. Skipping."
+		print error.read()
+		return {}
+
 	# Now we look for the <table> tag and retrieve all processes
 	parser = processparser.HtmlProcessParser()
 	parser.feed(f.read())
