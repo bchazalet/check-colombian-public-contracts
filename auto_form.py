@@ -17,6 +17,8 @@ from report import Report
 # Handle if there is more than 50 results and they are not all on the page
 # Handle HTTP Error 500: internal server error
 # Handle if you are running on Windows
+# Solve UTF-8 and spanish accents/letters issue
+# Create a conf file to edit email settings
 
 # LOW PRIORITY
 # DictDiffer should return the list of actual objets, no only the keys --> Wrapper
@@ -52,7 +54,7 @@ def main():
 	if len(entities) == 0:
 		print "%s:: No entities found. Are you sure the file is there?" % current_time
 	elif len(entities) < 10:
-		print "%s:: Will run against those entities %s" % (curent_time,entities)
+		print "%s:: Will run against those entities %s" % (current_time,entities)
 	else:
 		print "%s:: Will run against %d entities" % (current_time,len(entities))
 	total = 0;
@@ -65,7 +67,12 @@ def main():
 			total += len(new_processes)
 
 	# Notify the result
-	notif = Notification("Nuevos contratos disponibles", "There are new processes");
+	notif = None
+	if report.created:
+		text_body = "Hay %d nuevos contratos disponibles.\nAdjunto el reporte." % total
+		notif = Notification(text_body, report.file_path);
+	else:
+		notif = Notification("No hay nada nuevo hoy.", None);
 	notif.send()
 	# Display summary
 	print "\n"
