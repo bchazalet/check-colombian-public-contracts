@@ -24,7 +24,7 @@ password = ''
 class Notification(object):
 
 	def __init__(self, text, file_to_attach):
-		self.test_mode = False
+		self.test_mode = True
 		# Create the container (outer) email message.
 		self.message = MIMEMultipart()
 		self.message['Subject'] = "Auto_form report"
