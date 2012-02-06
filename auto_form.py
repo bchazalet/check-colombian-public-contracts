@@ -48,8 +48,8 @@ def main():
 			print "invalid option: %s" % sys.argv[0]
 			return
 	# We are good to go!
-	#entities = import_entities()
-	entities = {"285000001": "Gobernacion"}
+	entities = import_entities()
+	#entities = {"285000001": "Gobernacion"}
 	current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 	if len(entities) == 0:
 		print "%s:: No entities found. Are you sure the file is there?" % current_time
