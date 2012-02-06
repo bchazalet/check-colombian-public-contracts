@@ -19,10 +19,10 @@ from report import Report
 # Handle if you are running on Windows
 # Solve UTF-8 and spanish accents/letters issue
 # Create a conf file to edit email settings
+# Update the attached file's name with the actual report name
 
 # LOW PRIORITY
 # DictDiffer should return the list of actual objets, no only the keys --> Wrapper
-# Improve email notification with MIME format
 # A clear entities function that clears all entities folder (with a WARNING)
 # The way we build the new processes filename is not bullet proof (should get the latest filename)
 
@@ -48,8 +48,8 @@ def main():
 			print "invalid option: %s" % sys.argv[0]
 			return
 	# We are good to go!
-	entities = import_entities()
-	#entities = {"285000001": "Gobernacion"}
+	#entities = import_entities()
+	entities = {"285000001": "Gobernacion"}
 	current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 	if len(entities) == 0:
 		print "%s:: No entities found. Are you sure the file is there?" % current_time
