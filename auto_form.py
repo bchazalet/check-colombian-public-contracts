@@ -5,10 +5,12 @@ import os
 import pwd
 import sys
 import datetime
-
+from pymongo import Connection
+from pymongo.errors import ConnectionFailure
 # My own modules
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), 'pym'))
-import processparser
+from processparser import Process
+from processparser import HtmlProcessParser
 from notification import Notification
 import dictdiffer
 from report import Report
@@ -48,8 +50,15 @@ def main():
 			print "invalid option: %s" % sys.argv[0]
 			return
 	# We are good to go!
-	entities = import_entities()
-	#entities = {"285000001": "Gobernacion"}
+	try:
+		connection = Connection() # Mongo db
+		print "Connected to DB successfully"
+	except ConnectionFailure, e:
+		sys.stderr.write("Could not connect to MongoDB: %s" % e)
+		sys.exit(1)
+	db = connection["auto_form"]
+	#entities = import_entities()
+	entities = {"285000001": "Gobernacion"}
 	current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 	if len(entities) == 0:
 		print "%s:: No entities found. Are you sure the file is there?" % current_time
@@ -61,7 +70,7 @@ def main():
 	report = Report(os.path.join(base_dir,REPORTS_FOLDER))
 	for entity_id, entity_name in entities.iteritems():
 		print "\n***** Entity %s (%s) *****" % (entity_name, entity_id)
-		new_processes = do_one(entity_id)
+		new_processes = do_one(db, entity_id)
 		if len(new_processes) > 0:
 			report.append(entity_id, entity_name, new_processes)
 			total += len(new_processes)
@@ -82,7 +91,7 @@ def main():
 	print "# Report avail. at %s" % report.file_path
 	print "#############################################################"
 
-def do_one(entity):
+def do_one(db, entity):
 	"""Process one entity and return the list of new processes"""
 	url = "http://www.contratos.gov.co/consultas/resultadosConsulta.do?entidad=%s&desdeFomulario=true&estado=1&tipoProceso=1&objeto=72000000" % entity # objecto is the Producto o Servicio field
 	try:
@@ -96,7 +105,7 @@ def do_one(entity):
 		return {}
 
 	# Now we look for the <table> tag and retrieve all processes
-	parser = processparser.HtmlProcessParser()
+	parser = HtmlProcessParser()
 	parser.feed(f.read())
 	f.close()
 	# Print all parsed processes --commented out
@@ -121,7 +130,10 @@ def do_one(entity):
 		print p
 
 	# Write all processes fetched today to entity file
-	write_processes(entity, parser.all_processes)
+	if len(parser.all_processes) > 0:
+		#write_processes(entity, parser.all_processes)
+		list_of_p = parser.all_processes.values()
+		db.processes.insert(map(Process.to_dict_s, list_of_p))
 
 	new_processes = { k: parser.all_processes[k] for k in new_processes_key}
 
@@ -217,10 +229,10 @@ def retrieve_file_owner():
 def gen_test_processes():
 	"""Generate fake processses to test some functions"""
 	test = {}
-	p = processparser.Process()
+	p = Process()
 	p.id = "BOB-45-DI"
 	test[p.id] = p
-	p = processparser.Process()
+	p = Process()
 	p.id = "FDLCH-LIC-006-2012"
 	test[p.id] = p
 	return test

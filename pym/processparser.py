@@ -52,22 +52,22 @@ class HtmlProcessParser(SGMLParser):
 				useless = 0
 			elif self.curColumnNb == 1: #Id LP001-2011
 				if not self.idParsed:				
-					self.currentProcess.id = data.strip()
+					self.currentProcess.id = data.decode("windows-1252").encode("utf8").strip()
 					self.idParsed = True
 			elif self.curColumnNb == 2: # Licitacion Publica
-				self.currentProcess.type = remove_special_chars(data)
+				self.currentProcess.type = remove_special_chars(data.decode("windows-1252").encode("utf8"))
 			elif self.curColumnNb == 3: # Borrador
-				self.currentProcess.state = remove_special_chars(data)
+				self.currentProcess.state = remove_special_chars(data.decode("windows-1252").encode("utf8"))
 			elif self.curColumnNb == 4: # ADPOSTAL - ADMINISTRACION POSTAL NACIONAL E INTERNACIONAL
-				self.currentProcess.entity = remove_special_chars(data)
+				self.currentProcess.entity = remove_special_chars(data.decode("windows-1252").encode("utf8"))
 			elif self.curColumnNb == 5: # 
-				self.currentProcess.subject = remove_special_chars(data)
+				self.currentProcess.subject = remove_special_chars(data.decode("windows-1252").encode("utf8"))
 			elif self.curColumnNb == 6: #
-				self.currentProcess.place += remove_special_chars(data) 
+				self.currentProcess.place += remove_special_chars(data.decode("windows-1252").encode("utf8")) 
 			elif self.curColumnNb == 7: # 
-				self.currentProcess.price = remove_special_chars(data)
+				self.currentProcess.price = remove_special_chars(data.decode("windows-1252").encode("utf8"))
 			elif self.curColumnNb == 8: # 
-				self.currentProcess.date += remove_special_chars(data)
+				self.currentProcess.date += remove_special_chars(data.decode("windows-1252").encode("utf8"))
 
 def remove_special_chars(string):
 	string = string.replace(';','')
@@ -102,6 +102,14 @@ class Process():
 
 	def stringify(self, delim):
 		return "%s%c %s%c %s%c %s%c %s%c %s%c %s%c %s" % (self.id, delim, self.type, delim, self.state, delim, self.entity, delim, self.subject, delim, self.place, delim, self.price, delim, self.date)
+
+	def to_dict(self):
+		return {"id":self.id, "type":self.type, "state":self.state, "entity": self.entity, "subject":self.subject,
+		"place":self.place, "price":self.price, "date":self.date}
+
+	@staticmethod
+	def to_dict_s(p):
+		return p.to_dict()
 
 	def __str__(self):
 		return self.stringify(',')
