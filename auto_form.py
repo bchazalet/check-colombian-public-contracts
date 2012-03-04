@@ -132,7 +132,6 @@ def do_one(db, entity):
 	# Write all processes fetched today to entity file
 	if len(parser.all_processes) > 0:
 		res = db.processes.insert(parser.all_processes.values(), safe=True)
-		print "processes saved %s" % res
 
 	new_processes = { k: parser.all_processes[k] for k in new_processes_key}
 
@@ -156,7 +155,6 @@ def write_processes(entity, dict_of_processes):
 
 def read_processes(db, entity):
 	"""Read processes from db"""
-	print "entity %s" % entity
 	processes = db.processes.find({"entity_id":entity})
 	dict_of_processes = {}
 	for p in processes:
