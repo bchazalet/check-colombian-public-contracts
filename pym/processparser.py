@@ -43,7 +43,6 @@ class HtmlProcessParser(SGMLParser):
 			#self.allProcesses.append(self.currentProcess)
 			self.currentProcess["date"] = fix_date(self.currentProcess["date"])
 			self.all_processes[self.currentProcess["id"]] = self.currentProcess
-			print self.currentProcess
 	def start_td(self, attrs):
 		self.weAreInTd = True
 			
@@ -110,8 +109,9 @@ class Process():
 		self.price = ""
 		self.date = ""
 
-	def stringify(self, delim):
-		return "%s%c %s%c %s%c %s%c %s%c %s%c %s%c %s" % (self.id, delim, self.type, delim, self.state, delim, self.entity, delim, self.subject, delim, self.place, delim, self.price, delim, self.date)
+	@staticmethod
+	def stringify(d, delim):
+		return "%s%c %s%c %s%c %s%c %s%c %s%c %s%c %s" % (d["id"], delim, d["type"], delim, d["state"], delim, d["entity"], delim, d["subject"], delim, d["place"], delim, d["price"], delim, d["date"])
 
 	def to_dict(self):
 		return {"id":self.id, "type":self.type, "state":self.state, "entity": self.entity, "subject":self.subject,

@@ -18,8 +18,6 @@ from report import Report
 # TODO
 # Handle if there is more than 50 results and they are not all on the page
 # Handle HTTP Error 500: internal server error
-# Handle if you are running on Windows
-# Solve UTF-8 and spanish accents/letters issue
 # Create a conf file to edit email settings
 # Update the attached file's name with the actual report name
 
@@ -43,7 +41,7 @@ def main():
 	# We are good to go!
 	try:
 		connection = Connection() # Mongo db
-		print "Connected to DB successfully"
+		#print "Connected to DB successfully"
 	except ConnectionFailure, e:
 		sys.stderr.write("Could not connect to MongoDB: %s" % e)
 		sys.exit(1)
