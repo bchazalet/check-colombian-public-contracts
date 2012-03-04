@@ -38,20 +38,8 @@ def main():
 	# Where is our base folder (the one containing the auto_form.py file)?
 	global base_dir 
 	base_dir = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
-	delete_flag = False
-	# Parsing arguments
-	if len(sys.argv) > 2:
-		print "Too many arguments"
-		return
-	elif len(sys.argv) == 2:
-		if sys.argv[1] == "--setup-cron":
-			setup_cron()
-			return
-		elif sys.argv[1] == "-d":
-			delete_flag = True
-		elif sys.argv[1] != "--run":
-			print "invalid option: %s" % sys.argv[0]
-			return
+	# Parse arguments
+	flags = parse_args(sys.argv)
 	# We are good to go!
 	try:
 		connection = Connection() # Mongo db
@@ -60,7 +48,7 @@ def main():
 		sys.stderr.write("Could not connect to MongoDB: %s" % e)
 		sys.exit(1)
 	db = connection["auto_form"]
-	if delete_flag:
+	if flags["delete_all"]:
 		db.processes.remove({})
 		print "Deleted all data from db"
 	#entities = import_entities()
@@ -121,7 +109,7 @@ def do_one(db, entity):
 	if len(parser.all_processes) == 50:
 		print "WARNING: this entity could have more than 50 results. You SHOULD check manually."
 	
-	# Retrieve saved processes from hard drive
+	# Insert or update into database
 	new_processes = []
 	for p in parser.all_processes.itervalues():
 		res = db.processes.update({"id":p["id"]}, p, True, safe=True)
@@ -153,6 +141,23 @@ def import_entities():
 		file_input.close()
 	# In any case return the dict
 	return dict_of_entities
+
+def parse_args(argv):
+	""" Parsing arguments """
+	flags =  {"delete_all": False}
+	if len(argv) > 2:
+		print "Too many arguments"
+		sys.exit(1)
+	elif len(argv) == 2:
+		if argv[1] == "--setup-cron":
+			setup_cron()
+			sys.exit(0)
+		elif argv[1] == "-d":
+			flags["delete_all"] = True
+		elif argv[1] != "--run":
+			print "invalid option: %s" % argv[0]
+			sys.exit(1)
+	return flags
 
 def setup_cron():
 	owner_name = retrieve_file_owner();
