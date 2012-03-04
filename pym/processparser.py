@@ -3,6 +3,10 @@
 from sgmllib import SGMLParser
 
 class HtmlProcessParser(SGMLParser):
+	def __init__(self, entity_id):
+		SGMLParser.__init__(self)
+		self.entity_id = entity_id
+
 	def reset(self):
 		SGMLParser.reset(self)
 		self.tableTagFound = False
@@ -22,7 +26,10 @@ class HtmlProcessParser(SGMLParser):
 			#This is an actual line of table content
 			#print "This is an actual line of table content"	
 			self.idParsed = False
-			self.currentProcess = Process()
+			self.currentProcess = {}
+			self.currentProcess["entity_id"] = self.entity_id
+			self.currentProcess["place"] = ""
+			self.currentProcess["date"] = ""
 
 	def end_tr(self):
 		#print "in end_tr"
@@ -33,8 +40,9 @@ class HtmlProcessParser(SGMLParser):
 		else:
 			#print self.currentProcess
 			#self.allProcesses.append(self.currentProcess)
-			self.currentProcess.date = fix_date(self.currentProcess.date)
-			self.all_processes[self.currentProcess.id] = self.currentProcess
+			self.currentProcess["date"] = fix_date(self.currentProcess["date"])
+			self.all_processes[self.currentProcess["id"]] = self.currentProcess
+			print self.currentProcess
 	def start_td(self, attrs):
 		self.weAreInTd = True
 			
@@ -52,22 +60,22 @@ class HtmlProcessParser(SGMLParser):
 				useless = 0
 			elif self.curColumnNb == 1: #Id LP001-2011
 				if not self.idParsed:				
-					self.currentProcess.id = data.decode("windows-1252").encode("utf8").strip()
+					self.currentProcess["id"] = data.decode("windows-1252").encode("utf8").strip()
 					self.idParsed = True
 			elif self.curColumnNb == 2: # Licitacion Publica
-				self.currentProcess.type = remove_special_chars(data.decode("windows-1252").encode("utf8"))
+				self.currentProcess["type"] = remove_special_chars(data.decode("windows-1252").encode("utf8"))
 			elif self.curColumnNb == 3: # Borrador
-				self.currentProcess.state = remove_special_chars(data.decode("windows-1252").encode("utf8"))
+				self.currentProcess["state"] = remove_special_chars(data.decode("windows-1252").encode("utf8"))
 			elif self.curColumnNb == 4: # ADPOSTAL - ADMINISTRACION POSTAL NACIONAL E INTERNACIONAL
-				self.currentProcess.entity = remove_special_chars(data.decode("windows-1252").encode("utf8"))
+				self.currentProcess["entity"] = remove_special_chars(data.decode("windows-1252").encode("utf8"))
 			elif self.curColumnNb == 5: # 
-				self.currentProcess.subject = remove_special_chars(data.decode("windows-1252").encode("utf8"))
+				self.currentProcess["subject"] = remove_special_chars(data.decode("windows-1252").encode("utf8"))
 			elif self.curColumnNb == 6: #
-				self.currentProcess.place += remove_special_chars(data.decode("windows-1252").encode("utf8")) 
+				self.currentProcess["place"] += remove_special_chars(data.decode("windows-1252").encode("utf8")) 
 			elif self.curColumnNb == 7: # 
-				self.currentProcess.price = remove_special_chars(data.decode("windows-1252").encode("utf8"))
+				self.currentProcess["price"] = remove_special_chars(data.decode("windows-1252").encode("utf8"))
 			elif self.curColumnNb == 8: # 
-				self.currentProcess.date += remove_special_chars(data.decode("windows-1252").encode("utf8"))
+				self.currentProcess["date"] += remove_special_chars(data.decode("windows-1252").encode("utf8"))
 
 def remove_special_chars(string):
 	string = string.replace(';','')
@@ -82,6 +90,7 @@ def fix_date(wrongly_parsed_date):
 	return wrongly_parsed_date
 
 class Process():
+	"""Not in use anymore. We are mapping the process directly into a dict"""
 	# Numero de proceso 
 	# id - tipo de processo
 	# estado
@@ -113,5 +122,4 @@ class Process():
 
 	def __str__(self):
 		return self.stringify(',')
-
 

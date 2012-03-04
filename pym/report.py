@@ -19,7 +19,7 @@ class Report(object):
 			file_input = open(self.file_path,'a') # will append at this end of the file and will create the file if does not exist
 			file_input.write(entity_id + " - " + entity_name + "\n")
 			for p in dict_of_processes.itervalues():
-			    file_input.write(p.stringify(';'))
+			    file_input.write(str(p))
 			    file_input.write('\n')
 			file_input.write('\n')
 			file_input.close()

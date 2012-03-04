@@ -74,7 +74,7 @@ def main():
 		if len(new_processes) > 0:
 			report.append(entity_id, entity_name, new_processes)
 			total += len(new_processes)
-
+	db.connection.close()
 	# Notify the result
 	notif = None
 	if report.created:
@@ -105,7 +105,7 @@ def do_one(db, entity):
 		return {}
 
 	# Now we look for the <table> tag and retrieve all processes
-	parser = HtmlProcessParser()
+	parser = HtmlProcessParser(entity)
 	parser.feed(f.read())
 	f.close()
 	# Print all parsed processes --commented out
@@ -116,7 +116,7 @@ def do_one(db, entity):
 		print "WARNING: this entity could have more than 50 results. You SHOULD check manually."
 	
 	# Retrieve saved processes from hard drive
-	saved_processes = read_processes(entity) #gen_test_processes()
+	saved_processes = read_processes(db, entity) #gen_test_processes()
 	# Compare fetched process with saved ones
 	dictDiffer = dictdiffer.DictDiffer(parser.all_processes, saved_processes)
 	new_processes_key = list(dictDiffer.added())
@@ -131,9 +131,8 @@ def do_one(db, entity):
 
 	# Write all processes fetched today to entity file
 	if len(parser.all_processes) > 0:
-		#write_processes(entity, parser.all_processes)
-		list_of_p = parser.all_processes.values()
-		db.processes.insert(map(Process.to_dict_s, list_of_p))
+		res = db.processes.insert(parser.all_processes.values(), safe=True)
+		print "processes saved %s" % res
 
 	new_processes = { k: parser.all_processes[k] for k in new_processes_key}
 
@@ -155,21 +154,13 @@ def write_processes(entity, dict_of_processes):
 		file_input.write('\n')
 	file_input.close()
 
-def read_processes(entity):
-	"""Read processes from file on hard drive """
+def read_processes(db, entity):
+	"""Read processes from db"""
+	print "entity %s" % entity
+	processes = db.processes.find({"entity_id":entity})
 	dict_of_processes = {}
-	file_path = os.path.join(base_dir, ENTITIES_FOLDER, entity, FILE_NAME)
-	if not os.path.isfile(file_path):
-		print "***** There is no file for entity %s" % entity
-	else:
-		file_input = open(file_path, 'r')
-		# First thing on the line is the id (before the first semicolumn)
-		for line in file_input:
-			semi_col_idx = line.find(';')
-			if semi_col_idx != -1:
-				process_id = line[0:semi_col_idx]
-				dict_of_processes[process_id] = "found"
-		file_input.close()
+	for p in processes:
+		dict_of_processes[p["id"]] = "found"
 	# In any case return the dict
 	return dict_of_processes
 
