@@ -1,6 +1,6 @@
 #!/bin/bash
 VERSION=1.2
 PYTHON_MODULES=pym/*py
-ARCHIVE_NAME=AutoForm-release_$VERSION.zip
+ARCHIVE_NAME=AutoForm-mongo-release_$VERSION.zip
 
 zip $ARCHIVE_NAME $PYTHON_MODULES reports log entities-to-check.csv README auto_form.py

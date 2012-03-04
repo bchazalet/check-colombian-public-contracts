@@ -26,7 +26,6 @@ from report import Report
 # A clear entities function that clears all entities folder (with a WARNING)
 # The way we build the new processes filename is not bullet proof (should get the latest filename)
 
-FILE_NAME = "processes.txt"
 ENTITY_INPUT = "entities-to-check.csv"
 ENTITIES_FOLDER = "entities"
 REPORTS_FOLDER = "reports"
@@ -49,8 +48,8 @@ def main():
 	if flags["delete_all"]:
 		db.processes.remove({})
 		print "Deleted all data from db"
-	entities = import_entities()
-	#entities = {"285000001": "Gobernacion"}
+	#entities = import_entities()
+	entities = {"285000001": "Gobernacion"}
 	current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 	if len(entities) == 0:
 		print "%s:: No entities found. Are you sure the file is there?" % current_time
