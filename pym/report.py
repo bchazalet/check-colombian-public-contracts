@@ -12,13 +12,13 @@ class Report(object):
 		#self.folder_path = folder_path
 		self.created = False
 
-	def append(self,entity_id, entity_name, dict_of_processes):
+	def append(self,entity_id, entity_name, processes):
 		"""Append processes to a centralized file listing all new processes"""
-		if len(dict_of_processes) > 0:
+		if len(processes) > 0:
 			#file_path = os.path.join(self.folder_path, MAIN_FILE_NAME)
 			file_input = open(self.file_path,'a') # will append at this end of the file and will create the file if does not exist
 			file_input.write(entity_id + " - " + entity_name + "\n")
-			for p in dict_of_processes.itervalues():
+			for p in processes:
 			    file_input.write(str(p))
 			    file_input.write('\n')
 			file_input.write('\n')

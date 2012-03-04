@@ -38,6 +38,7 @@ def main():
 	# Where is our base folder (the one containing the auto_form.py file)?
 	global base_dir 
 	base_dir = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
+	delete_flag = False
 	# Parsing arguments
 	if len(sys.argv) > 2:
 		print "Too many arguments"
@@ -46,7 +47,9 @@ def main():
 		if sys.argv[1] == "--setup-cron":
 			setup_cron()
 			return
-		elif sys.arg[1] != "--run":
+		elif sys.argv[1] == "-d":
+			delete_flag = True
+		elif sys.argv[1] != "--run":
 			print "invalid option: %s" % sys.argv[0]
 			return
 	# We are good to go!
@@ -57,6 +60,9 @@ def main():
 		sys.stderr.write("Could not connect to MongoDB: %s" % e)
 		sys.exit(1)
 	db = connection["auto_form"]
+	if delete_flag:
+		db.processes.remove({})
+		print "Deleted all data from db"
 	#entities = import_entities()
 	entities = {"285000001": "Gobernacion"}
 	current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -116,51 +122,18 @@ def do_one(db, entity):
 		print "WARNING: this entity could have more than 50 results. You SHOULD check manually."
 	
 	# Retrieve saved processes from hard drive
-	saved_processes = read_processes(db, entity) #gen_test_processes()
+	new_processes = []
+	for p in parser.all_processes.itervalues():
+		res = db.processes.update({"id":p["id"]}, p, True, safe=True)
+		if res.has_key("upserted"):
+			# A new document was inserted, i.e process was new
+			new_processes.append(p)
 	# Compare fetched process with saved ones
-	dictDiffer = dictdiffer.DictDiffer(parser.all_processes, saved_processes)
-	new_processes_key = list(dictDiffer.added())
 	print "***** Processes added since last time "
-	for p in new_processes_key:
-		print p
-
-	result = list(dictDiffer.removed())
-	print "***** Processes removed since last time"
-	for p in result:
-		print p
-
-	# Write all processes fetched today to entity file
-	if len(parser.all_processes) > 0:
-		res = db.processes.insert(parser.all_processes.values(), safe=True)
-
-	new_processes = { k: parser.all_processes[k] for k in new_processes_key}
+	for p in new_processes:
+		print p["id"]
 
 	return new_processes
-
-def write_processes(entity, dict_of_processes):
-	"""Write the processes on the hard drive"""
-	# Check the entity folder exists
-	entity_path = os.path.join(base_dir, ENTITIES_FOLDER, entity)
-	if not os.path.isdir(entity_path):
-		# If not, create it
-		print "***** Directory for %s does not exist, creating it." % entity
-		os.makedirs(entity_path)
-	# Check that the processes file exists
-	file_path = os.path.join(base_dir, entity_path, FILE_NAME)
-	file_input = open(file_path,'w') # will create the file if does not exist
-	for p in dict_of_processes.itervalues():
-		file_input.write(p.stringify(';'))
-		file_input.write('\n')
-	file_input.close()
-
-def read_processes(db, entity):
-	"""Read processes from db"""
-	processes = db.processes.find({"entity_id":entity})
-	dict_of_processes = {}
-	for p in processes:
-		dict_of_processes[p["id"]] = "found"
-	# In any case return the dict
-	return dict_of_processes
 
 def import_entities():
 	"""Read entities from file on hard drive """
@@ -195,13 +168,6 @@ def setup_cron():
 			print "Could not write in /etc/cron.d/auto_form. Try to execute using sudo."
 	else:
 		print "Could not get your username. Failing."
-
-#	print "Not implemented yet"
-#	print "Meanwhile you can set it up editing your cron file manually."
-#	print "crontab -e"
-#	print "and add those lines (will run every day at 7am)"
-#	print 'MAILTO=""'
-#	print "00 06 * * * %s/auto_form.py >> %s/log/out" % (base_dir,base_dir)
 
 def retrieve_file_owner():
 	try:

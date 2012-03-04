@@ -1,5 +1,5 @@
 #!/usr/bin/python -tt
-
+from datetime import datetime
 from sgmllib import SGMLParser
 
 class HtmlProcessParser(SGMLParser):
@@ -28,6 +28,7 @@ class HtmlProcessParser(SGMLParser):
 			self.idParsed = False
 			self.currentProcess = {}
 			self.currentProcess["entity_id"] = self.entity_id
+			self.currentProcess["last_fetched_at"] = datetime.now()
 			self.currentProcess["place"] = ""
 			self.currentProcess["date"] = ""
 
