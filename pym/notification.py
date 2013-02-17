@@ -13,12 +13,12 @@ import mimetypes
 COMMASPACE = ', '
 # SMTP Server
 SMTP_SERVER = 'smtp.gmail.com:587'
-from_addr = 'pouyou.fr@gmail.com'
+from_addr = ''
 # Who should receive the notifications
-to_addrs  = 'boris.chazalet@gmail.com'
+to_addrs  = ''
 
 # Credentials (if needed)  
-username = 'pouyou.fr@gmail.com'  
+username = ''  
 password = ''  
 
 class Notification(object):
